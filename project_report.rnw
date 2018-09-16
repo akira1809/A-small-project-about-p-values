@@ -1,0 +1,202 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsfonts}
+
+\usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsrefs}
+\usepackage{ulem}
+\usepackage[dvips]{graphicx}
+\usepackage{bm}
+\usepackage{cancel}
+\usepackage{color}
+
+\setlength{\headheight}{26pt}
+\setlength{\oddsidemargin}{0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{8.5in}
+
+\topmargin 0pt
+%Forrest Shortcuts
+\newtheorem{defn}{Definition}
+\newtheorem{thm}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{pf}{Proof}
+\newtheorem{sol}{Solution}
+\newcommand{\R}{{\ensuremath{\mathbb R}}}
+\newcommand{\J}{{\ensuremath{\mathbb J}}}
+\newcommand{\Z}{{\mathbb Z}}
+\newcommand{\N}{{\mathbb N}}
+\newcommand{\T}{{\mathbb T}}
+\newcommand{\Q}{{\mathbb Q}}
+\newcommand{\st}{{\text{\ s.t.\ }}}
+\newcommand{\rto}{\hookrightarrow}
+\newcommand{\rtto}{\hookrightarrow\rightarrow}
+\newcommand{\tto}{\to\to}
+\newcommand{\C}{{\mathbb C}}
+\newcommand{\ep}{\epsilon}
+%CJ shortcuts
+\newcommand{\thin}{\thinspace}
+\newcommand{\beps}{\boldsymbol{\epsilon}}
+\newcommand{\bwoc}{by way of contradiction}
+
+%Munkres formatting?
+%\renewcommand{\theenumii}{\alph{enumi}}
+\renewcommand{\labelenumi}{\theenumi.}
+\renewcommand{\theenumii}{\alph{enumii}}
+\renewcommand{\labelenumii}{(\theenumii)}
+
+\title{Math Stat II Project \\ An Example of Exact and Approximate p-value}
+\author{Guanlin Zhang}
+
+\lhead{Dr Joshua Habiger
+ \\BIOS 872} \chead{}
+\rhead{Guanlin Zhang\\Spring '17} \pagestyle{fancyplain}
+%\maketitle
+
+\begin{document}
+\maketitle
+Our question:\vskip 2mm
+Suppose that $X_1 \sim \text{binomial}(n_1, p_1)$ and $X_2 \sim \text{binomial}(n_2, p_2)$. Construct a valid p-value for testing $H_0: p_1 = p_2$ based on the distribution of $X_1|X_1 + X_2 = t$. Construct an approximately valid p-value based on a normal approximation for $\hat{p}_1 - \hat{p}_2$ where $\hat{p}_i = X_i/n_i$. Use both p-values to analyze a real data set and compare the results.\vskip 2mm
+Our solution:\vskip 2mm
+Part I:\vskip 2mm
+Let's first construct a valid p-value based on the conditional distribution of $X_1|X_1 + X_2 = t$:\vskip 2mm
+We have $X_1 \sim \text{Binom}(n_1, p_1)$ and $X_2 \sim \text{Binom}(n_2, p_2)$, thus
+\begin{align*}
+  P(X_1 = x_1) &= {n_1\choose x_1}p_1^{x_1}(1 - p_1)^{n_1 - x_1}\\
+  P(X_2 = x_2) &= {n_2\choose x_2}p_2^{x_2}(1 - p_2)^{n_2 - x_2}
+\end{align*}
+So the joint pmf of the sample $(X_1, X_2)$ under the null $H_0: p_1 = p_2 = p$ is:
+\begin{align*}
+  f(x_1, x_2|p_1 = p_2 = p) &= {n_1 \choose x_1}p^{x_1}(1 - p)^{n_1 - x_1}{n_2 \choose x_2}p^{x_2}(1 - p)^{n_2 - x_2}\\
+  &= {n_1 \choose x_1}{n_2 \choose x_2}p^{x_1 + x_2}(1 - p)^{n_1 + n_2 - (x_1 + x_2)}
+\end{align*}
+It is easy to see by factorization theorem that $T = X_1 + X_2$ is a sufficient statistic under $H_0$, so we can compute the conditional distribution of $X_1|T = t$ as the following:
+\begin{align*}
+  P_{H_0}(X_1 = x_1| T = t) &= \frac{P(X_1 = x_1, X_2 = t - x_1)}{P(T = t)} = \frac{{n_1 \choose x_1}{n_2 \choose t - x_1}p^t(1 - p)^{n_1 + n_2 - t}}{{n_1 + n_2 \choose t}p^t(1 - p)^{n_1 + n_2 - t}}\\
+  &= \frac{{n_1 \choose x_1}{n_2 \choose t - x_1}}{{n_1 + n_2 \choose t}}
+\end{align*}
+which is the pmf of a hypergeometric distribution with parameter $(n_1 + n_2, n_1, t)$, and we denote it as $\text{HG}(n_1 + n_2, n_1, t)$. So $P_{H_0}(X_1|T = t) \sim \text{HG}(n_1 + n_2, n_1, t)$ which does {\bf NOT} depend on $p_1 = p_2 = p$ (because $T$ is sufficient).\vskip 2mm
+Let's consider the alternative hypothesis as $H_1: p_1 > p_2$, then given $T = X_1 + X_2 = t$, it is reasonable to reject $H_0$ if $X_1 \geq x_1$ for some appropriate $x_1$. (If we consider $H_1: p_1 < p_2$, we reject when $X_2 > x_2$ for some $x_2$, and the approach would be similar).\vskip 2mm
+Also just for a sidenote, the likelihood ratio test would give us a very complicated tes statistic here so we will not use it. We skip the algebra detail for deriving the likehood ratio test statistic but just give the result to show it is very impractical to use here. The LRT in this case is:
+\begin{align*}
+  \Lambda = \Big(\frac{\frac{X_1 + X_2}{n_1 + n_2}}{\frac{X_1}{n_1}}\Big)^{X_1}\Big(\frac{\frac{X_1 + X_2}{n_1 + n_2}}{\frac{X_2}{n_2}}\Big)^{X_2}\Big(\frac{1 - \frac{X_1 + X_2}{n_1 + n_2}}{1 - \frac{X_1}{n_1}}\Big)^{n_1 - X_1}\Big(\frac{1 - \frac{X_1 + X_2}{n_1 + n_2}}{1 - \frac{X_2}{n_2}}\Big)^{n_2- X_2}
+\end{align*}
+So move on to $P(X_1|X_1 + X_2 = t)$. Notice that:
+\begin{align*}
+  \text{If } t \leq n_1: &\ \\
+  \text{ then } &\ X_1 \in \{0, 1, 2, \ldots, t\}\\
+  \text{If } t > n_1: &\ \\
+  \text{ then } &\ X_1 \in \{0, 1, 2, \ldots, n_1\}
+\end{align*}
+In conclusion, $X_1 \leq \min\{t, n_1\}$. So we have:
+\begin{align*}
+  P(X_1 \geq x_1 |T = t) &= \sum_{j = x_1}^{\min\{t, n_1\}}P(X_1 = j|T = t) = \sum_{j = x_1}^{\min\{t, n_1\}}\frac{{n_1\choose j}{n_2\choose t - j}}{{n_1 + n_2\choose t}} \\
+  &= \frac{1}{{n_1 + n_2 \choose t}}\sum_{j = x_1}^{\min\{t, n_1\}}{n_1 \choose j}{n_2 \choose t - j}
+\end{align*}
+So given $X_1 = x_1, X_2 = x_2$, we can define a p-value as:
+\begin{align*}
+  p_1(x_1, x_2) &= P(X_1 \geq x_1 | X_1 + X_2 = x_1 + x_2) = \sum_{j = x_1}^{\min\{x_1+ x_2, n_1\}}P(X_1 = j|X_1 + X_2 = x_1 + x_2)\\
+  &= \frac{1}{{n_1 + n_2 \choose x_1 + x_2}}\sum_{j = x_1}^{\min\{x_1 + x_2, n_1\}}{n_1 \choose j}{n_2 \choose x_1 + x_2 - j}
+\end{align*}
+Let's verify that $p_1(X_1, X_2)$ defined above is valid. We want to be careful with directly claiming it is valid from the result of the book, because the book only dealt with continuous distribution and used the fact that $F({\bf X})$ follows uniform distribution, which we can not do here.\vskip 2mm
+Our proof of p-value validation:\vskip 2mm
+\begin{align*}
+  P_{H_0}(p_1(X_1, X_2) \leq \alpha) &= \sum_{t}\underbrace{P(p_1(X_1, X_2) \leq \alpha|X_1 + X_2 = t)}_{X_1 + X_2 \text{ sufficient }}\cdot P_{H_0}(X_1 + X_2 = t)
+\end{align*}
+It will suffice to show for each given value $X_1 + X_2 = t$:
+\begin{align*}
+  P(p_1(X_1, X_2) \leq \alpha|X_1 + X_2 = t) \leq \alpha
+\end{align*}
+because then the p-value would be estimated as:
+\begin{align*}
+  P_{H_0}(p_1(X_1, X_2) \leq \alpha) &\leq \sum_{t}\alpha\cdot P_{H_0}(X_1 + X_2 = t) = \alpha\sum_{t}P_{H_0}(X_1 + X_2 = t)\\
+  & = \alpha
+\end{align*}
+We have the following estimation:
+\begin{align*}
+  P(p_1(X_1, X_2)\leq \alpha|X_1 + X_2 = t) &= P\Big(\sum_{j = X_1}^{\min\{X_1 + X_2, n_1\}}P(X_1= j|X_1 + X_2) \leq \alpha\Big\vert X_1 + X_2 = t\Big)\\
+  &=P\Big(\Big\{x_1: \sum_{j = x_1}^{\min\{t, n_1\}}P(X_1 = j|X_1 + X_2 = t) \leq \alpha\Big\}\Big\vert X_1 + X_2 = t\Big)\\
+  &= P\Big(\Big\{x_1: x_1 \geq 1-\alpha \text{ quantile of HG}(n_1+ n+2, n_1, t)\Big\}\Big)\\
+  &\leq \alpha
+\end{align*}
+Since $t$ is any possiblevalue of $X_1 + X_2$ here, we have finished our proof of p-value validation.\vskip 2mm
+Part II:\vskip 2mm
+Now we construct an approximately valid p-value based on the normal approximation of $\hat{p}_1 - \hat{p}_2 = \frac{X_1}{n_1} - \frac{X_2}{n_2}$:\vskip 2mm
+Since $X_1 \sim \text{Binom}(n_1, p_1), X_2 \sim \text{Binom}(n_2, p_2)$, we can approximate $X_1$ and $X_2$ with normal distribution: $X_1 \sim N\Big(n_1p_1, n_1p_1(1 - p_1)\Big), X_2 \sim N\Big(n_2p_2, n_2p_2(1 - p_2)\Big)$.\vskip 2mm
+So we have:
+\begin{align*}
+  \hat{p}_1 - \hat{p}_2 &= \frac{X_1}{n_1} - \frac{X_2}{n_2}\\
+  &\sim \frac{N(n_1p_1, n_1p_1(1 - p_1))}{n_1} - \frac{N(n_2p_2, n_2p_2(1 - p_2))}{n_2} \\
+  &\sim N\Big(p_1, \frac{p_1(1 - p_1)}{n_1}\Big) - N\Big(p_2, \frac{p_2(1 - p_2)}{n_2}\Big)\\
+  &\sim N\Big(p_1 - p_2, \frac{p_1(1 - p_1)}{n_1}+ \frac{p_2(1 - p_2)}{n_2}\Big)
+\end{align*}
+The last one is due to the independence of $X_1$ and $X_2$. So under the null $H_0: p_1 = p_2= p$, we have:
+\begin{align*}
+  \hat{p}_1 - \hat{p}_2 \sim N\Big(0, (\frac{1}{n_1} + \frac{1}{n_2})p(1 - p)\Big)
+\end{align*}
+Consider $H_1: p_1 > p_2$, then we let $T = \hat{p}_1 - \hat{p}_2$ be the test statistic, and reject when $T \geq k$ for appropriate $k$.\vskip 2mm
+Notice that we have:
+\begin{align*}
+ P_{H_0}\Big(T \geq \frac{x_1}{n_1} - \frac{x_2}{n_2}\Big)&= P_{H_0}\Big(\frac{\frac{X_1}{n_1} - \frac{X_2}{n_2}}{\sqrt{(\frac{1}{n_1} + \frac{1}{n_2})p(1 - p)}} \geq \frac{\frac{x_1}{n_1} - \frac{x_2}{n_2}}{\sqrt{(\frac{1}{n_1} + \frac{1}{n_2})p(1 - p)}}\Big)\\
+  &\stackrel{\text{approximately}}{\simeq} P\Big(Z > \frac{\frac{x_1}{n_1} - \frac{x_2}{n_2}}{\sqrt{(\frac{1}{n_1} + \frac{1}{n_2})p(1 - p)}}\Big)\hskip 1cm (Z \sim N(0, 1))
+\end{align*}
+So we can define our p-value as:
+\begin{align*}
+  p_2(x_1, x_2) = P\Big(Z > \frac{\frac{x_1}{n_1} - \frac{x_2}{n_2}}{\sqrt{(\frac{1}{n_1} + \frac{1}{n_2})p(1 - p)}}\Big)
+\end{align*}
+We want to check the p value defined above is approximately valid:
+\begin{align*}
+  P_{H_0}\Big(p_2(X_1, X_2) \leq \alpha\Big) &= P_{H_0}\Big(P(Z > \frac{\frac{X_1}{n_1} - \frac{X_2}{n_2}}{\sqrt{(\frac{1}{n_1} + \frac{1}{n_2})p(1 - p)}}) \leq \alpha\Big)\\
+  &= P_{H_0}\Big(\frac{\frac{X_1}{n_1} - \frac{X_2}{n_2}}{\sqrt{(\frac{1}{n_1} + \frac{1}{n_2})p(1 - p)}} \geq \Phi^{-1}(1 - \alpha)\Big) \hskip 1cm (\Phi \text{ is the cdf of }N(0, 1))\\
+  & \stackrel{\text{approximately}}{\simeq} P\Big(Z \geq \Phi^{-1}(1 - \alpha)\Big)\\
+  &\leq \alpha
+\end{align*}
+So our p value is {\bf approximately} valid. However this does not prove that the p value is valid. In fact it is not, as we will see in the simulation below.\vskip 2mm
+Part III:\vskip 2mm
+Now we simulate some data and compare the type I error between the two test functions defined by each p-value.\vskip 2mm
+Our test functions are:
+\begin{align*}
+  \phi_1(X_1, X_2) &= I(p_1(X_1, X_2)\leq \alpha)\\
+  \phi_2(X_1, X_2) &= I(p_2(X_1, X_2) \leq \alpha)
+\end{align*}
+We take $\alpha = 0.05$, and simulate $(X_1, X_2)$ for $1000$ times under the null hypothesis and compute the type I error rate.\vskip 2mm
+We have the following code:
+<<tidy = FALSE>>==
+#generate X_1 and X_2.
+#X_1 follows binom(30, 0.5), X_2 follows binom(50, 0.5)
+#we simulate 1000 times
+X_1 <- rbinom(1000, 30, 0.5)
+X_2 <- rbinom(1000, 50, 0.5)
+
+#compute the p value under binomial distribution
+p_binom <- rep(0, 1000)
+
+for (i in 1:1000){
+  for(j in X_1[i]: min(X_1[i]+ X_2[i], 30)){
+    p_binom[i] <- p_binom[i] + 
+      choose(30, j)*choose(50, X_1[i]+X_2[i]-j)/choose(80, X_1[i]+X_2[i])
+  }
+}
+
+#compute the p value under the normal approximation
+p_norm <- rep(0, 1000)
+
+for (i in 1:1000){
+  p_norm[i] <- pnorm((X_1[i]/30- X_2[i]/50)/sqrt(0.25*(1/30+1/50)), 
+                     mean=0, sd=1, lower.tail=FALSE)
+}
+
+#compute the test function:
+phi_binom <- ifelse(p_binom<=0.05, 1, 0)
+phi_norm <- ifelse(p_norm<=0.05, 1, 0)
+#compute the type I error:
+Err_binom <- sum(phi_binom)/1000
+Err_norm <- sum(phi_norm)/1000
+cat("The Type I Error with binomial distribution is:", Err_binom )
+cat("The Type I Error with normal approximation is:", Err_norm)
+@
+We find that $\phi_1$ alwyas give a lower type I error rate than $\phi_2$, and as expected $\phi_1$ always have a type I error rate $\leq \alpha = 0.05$. However the type I error rate for $\phi_2$ is closer to $0.05$, some times even larger than $\alpha = 0.05$(depends on the random result we get each time when we run the simulation), which also verifies that $p_2(X_1, X_2)$ is not valid, but only approximately valid.
+\end{document}
